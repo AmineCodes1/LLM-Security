@@ -34,8 +34,14 @@ def main() -> None:
     logger = logging.getLogger(__name__)
     ingestor = DocumentIngestionService(settings)
 
-    chunks = ingestor.ingest_directory(args.input_dir)
-    logger.info("Indexed %s chunks.", chunks)
+    result = ingestor.ingest_directory_with_stats(args.input_dir)
+    logger.info(
+        "Ingestion summary: source_docs=%s, chunks=%s, indexed=%s, skipped_duplicates=%s",
+        result.source_documents,
+        result.total_chunks,
+        result.indexed_chunks,
+        result.skipped_duplicates,
+    )
 
 
 if __name__ == "__main__":
