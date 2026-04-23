@@ -18,9 +18,11 @@ LLM-Security/
 		chroma/
 		raw/
 	scripts/
+		generate_attack_documents.py
 		ingest_documents.py
 	src/
 		aegis_rag/
+			attack_simulation.py
 			__init__.py
 			config.py
 			guardrails.py
@@ -40,10 +42,12 @@ LLM-Security/
 3. Ensure Ollama is running locally and pull a model:
 	 `ollama pull mistral:7b`
 4. Copy `.env.example` to `.env` and adjust values if needed.
-5. Add PDF/TXT files to `data/raw`.
-6. Ingest documents:
+5. Generate a clean + poisoned attack pair (optional but recommended):
+	 `python scripts/generate_attack_documents.py --output-dir data/raw --overwrite`
+6. Add or review PDF/TXT files in `data/raw`.
+7. Ingest documents:
 	 `python scripts/ingest_documents.py --input-dir data/raw`
-7. Launch UI:
+8. Launch UI:
 	 `streamlit run streamlit_app.py`
 
 ## Notes for local 16GB RAM
