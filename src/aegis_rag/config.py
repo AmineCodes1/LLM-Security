@@ -18,6 +18,10 @@ class AppSettings:
     chunk_overlap: int = 50
     retrieval_k: int = 3
     log_level: str = "INFO"
+    # Shield / guardrails settings
+    shield_enabled: bool = True
+    shield_use_llm_judge_on_flag: bool = False
+    shield_sanitize_policy: str = "redact"  # one of: redact, drop, replace
 
     @classmethod
     def from_env(cls) -> "AppSettings":
@@ -33,6 +37,9 @@ class AppSettings:
             chunk_overlap=_int_from_env("CHUNK_OVERLAP", 50),
             retrieval_k=_int_from_env("RETRIEVAL_K", 3),
             log_level=os.getenv("LOG_LEVEL", "INFO"),
+            shield_enabled=_bool_from_env("SHIELD_ENABLED", True),
+            shield_use_llm_judge_on_flag=_bool_from_env("SHIELD_USE_LLM_JUDGE", False),
+            shield_sanitize_policy=os.getenv("SHIELD_SANITIZE_POLICY", "redact"),
         )
 
 
@@ -44,3 +51,10 @@ def _int_from_env(name: str, default: int) -> int:
         return int(value)
     except ValueError as exc:
         raise ValueError(f"Environment variable {name} must be an integer.") from exc
+
+
+def _bool_from_env(name: str, default: bool) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.lower() in ("1", "true", "yes", "on")
