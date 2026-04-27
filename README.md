@@ -49,6 +49,9 @@ LLM-Security/
 	 `python scripts/ingest_documents.py --input-dir data/raw`
 8. Launch UI:
 	 `streamlit run streamlit_app.py`
+	 - Upload PDF/TXT files and click "Add to knowledge base" to ingest.
+	 - Use the chat box to run queries.
+	 - Toggle the Shield and sanitization policy in the sidebar.
 
 ## Notes for local 16GB RAM
 
