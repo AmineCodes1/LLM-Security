@@ -5,7 +5,10 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+try:
+    from langchain.text_splitter import RecursiveCharacterTextSplitter
+except ModuleNotFoundError:
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
