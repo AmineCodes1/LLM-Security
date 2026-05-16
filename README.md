@@ -53,6 +53,16 @@ LLM-Security/
 	 - Use the chat box to run queries.
 	 - Toggle the Shield and sanitization policy in the sidebar.
 
+## Evaluation
+
+Run a simple evaluation loop to measure attack success rate, false positives, and latency impact:
+
+```
+python scripts/evaluate_system.py --iterations 20 --poisoned-ratio 0.5 --dry-run
+```
+
+Use `--json` for machine-readable output.
+
 ## Notes for local 16GB RAM
 
 - Default model is `mistral:7b` for lower memory pressure.

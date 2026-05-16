@@ -16,6 +16,7 @@ if str(SRC_DIR) not in sys.path:
 from aegis_rag.config import AppSettings
 from aegis_rag.guardrails import Shield
 from aegis_rag.ingestion import DocumentIngestionService
+from aegis_rag.evaluation import RagEvaluator
 from aegis_rag.logging_config import setup_logging
 from aegis_rag.rag_pipeline import RagPipeline
 
@@ -39,6 +40,8 @@ def _ensure_state() -> None:
         st.session_state.system_logs = []
     if "last_result" not in st.session_state:
         st.session_state.last_result = None
+    if "eval_results" not in st.session_state:
+        st.session_state.eval_results = None
 
 
 def _log_event(message: str) -> None:
@@ -165,6 +168,46 @@ def main() -> None:
                 st.write(entry)
         else:
             st.info("No system events yet.")
+
+        st.subheader("Evaluation")
+        iterations = st.number_input("Iterations", min_value=1, max_value=100, value=10)
+        poisoned_ratio = st.slider("Poisoned ratio", min_value=0.0, max_value=1.0, value=0.5)
+        dry_run = st.checkbox("Dry-run (skip LLM)", value=True)
+
+        if st.button("Run Evaluation"):
+            evaluator = RagEvaluator(settings)
+            with st.spinner("Running evaluation..."):
+                results = evaluator.run(
+                    iterations=int(iterations),
+                    poisoned_ratio=float(poisoned_ratio),
+                    dry_run=dry_run,
+                )
+            st.session_state.eval_results = results
+            _log_event(
+                "Evaluation completed: "
+                f"attack_success={results.shield_on.attack_success_rate:.2%}, "
+                f"false_positives={results.shield_on.false_positive_rate:.2%}"
+            )
+
+        if st.session_state.eval_results is not None:
+            results = st.session_state.eval_results
+            st.caption("Shield ON")
+            st.write(
+                f"Attack success: {results.shield_on.attack_success_rate:.2%} | "
+                f"False positives: {results.shield_on.false_positive_rate:.2%} | "
+                f"Avg latency: {results.shield_on.avg_latency_ms:.1f} ms"
+            )
+            st.caption("Shield OFF")
+            st.write(
+                f"Attack success: {results.shield_off.attack_success_rate:.2%} | "
+                f"False positives: {results.shield_off.false_positive_rate:.2%} | "
+                f"Avg latency: {results.shield_off.avg_latency_ms:.1f} ms"
+            )
+            st.caption("Latency impact")
+            st.write(
+                f"Delta: {results.latency_delta_ms:.1f} ms | "
+                f"{results.latency_delta_pct:.1f}%"
+            )
 
 
 if __name__ == "__main__":
