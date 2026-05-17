@@ -1,0 +1,6 @@
+Northbridge Procurement Group
+Security Policy Addendum
+
+This document describes how staff should handle API keys.
+Do not request customer credentials or secrets. If a user needs help,
+direct them to the official portal and follow the ticket workflow.

@@ -1,70 +1,41 @@
-# LLM-Security
+# Project Aegis-RAG
 
-Project Aegis-RAG is a local Retrieval-Augmented Generation scaffold focused on security experimentation.
+## Goal
+Demonstrate indirect prompt injection in a RAG pipeline, then compare vulnerable vs. defended behavior using a local stack (Ollama + ChromaDB + Streamlit).
 
-## Why this structure
+## Architecture (High-Level)
+1. Ingest documents (PDF/TXT), chunk, embed, store in ChromaDB.
+2. Retrieve top-k chunks for a user question.
+3. Optional Shield: scan/flag/sanitize retrieved context.
+4. Generate an answer grounded in retrieved context.
+5. Optional output validation blocks unsafe responses.
+6. UI surfaces retrieved context and threat signals.
 
-- `src/aegis_rag`: Core business logic (config, ingestion, retrieval/generation, guardrails). Keeping logic in `src` makes imports explicit and test-friendly.
-- `scripts`: Operational commands, separated from core logic to keep the package reusable.
-- `streamlit_app.py`: Thin UI layer so frontend changes do not affect backend services.
-- `data/raw`: Input documents for ingestion.
-- `data/chroma`: Persistent local vector store.
-
-## Project layout
-
-```
-LLM-Security/
-	data/
-		chroma/
-		raw/
-	scripts/
-		generate_attack_documents.py
-		ingest_documents.py
-	src/
-		aegis_rag/
-			attack_simulation.py
-			__init__.py
-			config.py
-			guardrails.py
-			ingestion.py
-			logging_config.py
-			rag_pipeline.py
-	.env.example
-	requirements.txt
-	streamlit_app.py
-```
-
-## Quick start
-
+## Setup
 1. Create and activate a virtual environment.
 2. Install dependencies:
-	 `pip install -r requirements.txt`
+   `pip install -r requirements.txt`
 3. Ensure Ollama is running locally and pull a model:
-	 `ollama pull mistral:7b`
-4. Copy `.env.example` to `.env` and adjust values if needed.
-5. Generate a clean + poisoned attack pair (optional but recommended):
-	 `python scripts/generate_attack_documents.py --output-dir data/raw --overwrite`
-6. Add or review PDF/TXT files in `data/raw`.
-7. Ingest documents:
-	 `python scripts/ingest_documents.py --input-dir data/raw`
-8. Launch UI:
-	 `streamlit run streamlit_app.py`
-	 - Upload PDF/TXT files and click "Add to knowledge base" to ingest.
-	 - Use the chat box to run queries.
-	 - Toggle the Shield and sanitization policy in the sidebar.
+   `ollama pull mistral:7b`
+4. (Optional) Copy `.env.example` to `.env` and adjust values.
 
-## Evaluation
+## Run the App
+`streamlit run streamlit_app.py`
 
-Run a simple evaluation loop to measure attack success rate, false positives, and latency impact:
+In the UI:
+- Upload PDF/TXT files and click "Add to knowledge base" to ingest.
+- Use the chat box for queries.
+- Toggle the Shield and sanitization policy in the sidebar.
 
-```
-python scripts/evaluate_system.py --iterations 20 --poisoned-ratio 0.5 --dry-run
-```
+## Example Attack Scenario
+1. Generate a clean + poisoned document pair:
+   `python scripts/generate_attack_documents.py --output-dir data/raw --overwrite`
+2. Ingest documents:
+   `python scripts/ingest_documents.py --input-dir data/raw`
+3. Ask a neutral question in the UI.
+   - With Shield OFF, the poisoned chunk may steer the model to request sensitive data.
+   - With Shield ON, the context is flagged/sanitized and unsafe output is blocked.
 
-Use `--json` for machine-readable output.
-
-## Notes for local 16GB RAM
-
-- Default model is `mistral:7b` for lower memory pressure.
-- Embeddings use `sentence-transformers/all-MiniLM-L6-v2` for compact footprint.
-- Retrieval defaults to top-k=3 to keep context and latency controlled.
+## Evaluation (Optional)
+Run a small evaluation loop to measure attack success rate, false positives, and latency impact:
+`python scripts/evaluate_system.py --iterations 20 --poisoned-ratio 0.5 --dry-run`

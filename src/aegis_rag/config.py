@@ -14,7 +14,7 @@ class AppSettings:
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
     chroma_persist_dir: Path = Path("data/chroma")
     collection_name: str = "aegis_rag"
-    chunk_size: int = 500
+    chunk_size: int = 700
     chunk_overlap: int = 50
     retrieval_k: int = 3
     log_level: str = "INFO"
@@ -33,7 +33,7 @@ class AppSettings:
             ),
             chroma_persist_dir=Path(os.getenv("CHROMA_PERSIST_DIR", "data/chroma")),
             collection_name=os.getenv("CHROMA_COLLECTION", "aegis_rag"),
-            chunk_size=_int_from_env("CHUNK_SIZE", 500),
+            chunk_size=_int_from_env("CHUNK_SIZE", 700),
             chunk_overlap=_int_from_env("CHUNK_OVERLAP", 50),
             retrieval_k=_int_from_env("RETRIEVAL_K", 3),
             log_level=os.getenv("LOG_LEVEL", "INFO"),
